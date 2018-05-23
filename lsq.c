@@ -118,7 +118,7 @@ approx(struct data *data, double *coef, long len)
 		if (dflag && vflag) {
 			d = val - p->y;
 			e += d * d;
-			printf("% e % e % e % e\n", p->x, p->y, val, d);
+			printf("% e % e % e % e\n", p->x, val, p->y, d);
 		} else {
 			printf("% e %e\n", p->x, val);
 		}
