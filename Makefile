@@ -26,9 +26,9 @@ SRCS =			\
 	matrix.c	\
 	matrix.h
 
-HAVE_SRCS =	have-err.c have-strtonum.c	
-COMPAT_SRCS =	compat-err.c compat-strtonum.c
-COMPAT_OBJS =	compat-err.o compat-strtonum.o
+HAVE_SRCS =	have-err.c have-reallocarray.c have-strtonum.c
+COMPAT_SRCS =	compat-err.c compat-reallocarray.c compat-strtonum.c
+COMPAT_OBJS =	compat-err.o compat-reallocarray.o compat-strtonum.o
 
 lc_OBJS =	lc.o lincode.o matrix.o
 le_OBJS =	le.o lineq.o matrix.o
@@ -87,14 +87,14 @@ clean:
 distclean: clean
 	rm -f Makefile.local config.h config.h.old config.log config.log.old
 
-lc: $(lc_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(lc_OBJS)
+lc: $(lc_OBJS) $(COMPAT_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(lc_OBJS) $(COMPAT_OBJS)
 
-le: $(le_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(le_OBJS)
+le: $(le_OBJS) $(COMPAT_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(le_OBJS) $(COMPAT_OBJS)
 
-lsq: $(lsq_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(lsq_OBJS) -lm
+lsq: $(lsq_OBJS) $(COMPAT_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(lsq_OBJS) $(COMPAT_OBJS) -lm
 
 dist: $(TARBALL)
 

@@ -38,8 +38,8 @@ LDFLAGS=
 LDADD=
 
 HAVE_ERR=
+HAVE_REALLOCARRAY=
 HAVE_STRTONUM=
-#HAVE_REALLOCARRAY=
 
 INSTALL="install"
 PREFIX="$HOME"
@@ -123,8 +123,8 @@ runtest() {
 # --- run the tests ---
 
 runtest err		ERR		|| true
+runtest reallocarray	REALLOCARRAY	|| true
 runtest strtonum	STRTONUM	|| true
-#runtest reallocarray	REALLOCARRAY	|| true
 
 # --- write config.h ---
 
@@ -137,14 +137,12 @@ cat << __HEREDOC__
 
 __HEREDOC__
 
-#[ ${HAVE_REALLOCARRAY} -eq 0 -o ${HAVE_RECALLOCARRAY} -eq 0 -o \
-  #${HAVE_STRLCAT} -eq 0 -o ${HAVE_STRLCPY} -eq 0 -o \
-  #${HAVE_STRNDUP} -eq 0 ] \
-	#&& echo "#include <sys/types.h>"
-
+[ ${HAVE_REALLOCARRAY} -eq 0 ] && echo "#include <sys/types.h>"
 
 cat << __HEREDOC__
+
 #define HAVE_ERR ${HAVE_ERR}
+#define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
 #define HAVE_STRTONUM ${HAVE_STRTONUM}
 
 __HEREDOC__
@@ -156,11 +154,11 @@ if [ ${HAVE_ERR} -eq 0 ]; then
 	echo "extern	void	  warnx(const char *, ...);"
 fi
 
+[ ${HAVE_REALLOCARRAY} -eq 0 ] && \
+	echo "extern	void	 *reallocarray(void *, size_t, size_t);"
+
 [ ${HAVE_STRTONUM} -eq 0 ] && \
 	echo "extern	long long strtonum(const char *, long long, long long, const char **);"
-
-#[ ${HAVE_REALLOCARRAY} -eq 0 ] && \
-	#echo "extern	void	 *reallocarray(void *, size_t, size_t);"
 
 echo "config.h: written" 1>&2
 echo "config.h: written" 1>&3

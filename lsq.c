@@ -6,6 +6,7 @@
 #include <math.h>
 #include <err.h>
 
+#include "config.h"
 #include "matrix.h"
 #include "lineq.h"
 

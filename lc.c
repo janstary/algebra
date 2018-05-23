@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <err.h>
 
+#include "config.h"
 #include "matrix.h"
 #include "lincode.h"
 

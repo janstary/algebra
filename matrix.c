@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <err.h>
 
+#include "config.h"
 #include "matrix.h"
 
 /* Parse a string of numbers separated by whitespace and save it in an array.
