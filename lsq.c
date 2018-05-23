@@ -24,7 +24,7 @@ struct data {
 };
 
 static void
-usage()
+usage(void)
 {
 	fprintf(stderr,
 		"%s [-D degree] [-d] [-n] [-v] data\n"

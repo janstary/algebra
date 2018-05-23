@@ -9,8 +9,8 @@ extern const char* __progname;
 
 int vflag = 0;
 
-void
-usage()
+static void
+usage(void)
 {
 	fprintf(stderr,
 		"usage: %s [-g] matrix\n", __progname);

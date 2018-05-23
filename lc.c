@@ -13,8 +13,8 @@ int gflag = 0;
 int Gflag = 0;
 int vflag = 0;
 
-void
-usage()
+static void
+usage(void)
 {
 	fprintf(stderr,
 		"usage: %s [-c] [-g] [-v] code [file ...]\n", __progname);
