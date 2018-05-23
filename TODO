@@ -1,0 +1,6 @@
+* README, INSTALL
+* slap the license on everything
+* matrix: addition, multiplication, inverse, etc
+* wlsq: weighted least squares
+* lsq, wlsq: allow 'expr' such as 'sin(2*x)/10' instead of function.so
+* integrate the 'numbaz' repository into this

@@ -1,0 +1,18 @@
+.Dd May 22, 2018
+.Dt LE 1
+.Os
+.Sh NAME
+.Nm le
+.Nd solve linear equations
+.Sh SYNOPSIS
+.Nm
+.\".Op Fl r Ar num
+.Op Ar matrix
+.Sh DESCRIPTION
+.Nm
+solves a system of linear equations given by
+.Ar matrix
+either in an input file or on standard input.
+The matrix consists of rows containing real numbers,
+the rightmost column being taken as the right side vector.
+.\" TODO -r num specifies the number of right columns

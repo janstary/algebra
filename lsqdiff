@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# FIXME: lsq itself can do this, if equipped with dlopen(3).
+# Here, we will just draw the resulting pictures.
+
+err() {
+	echo $@ >&2
+}
+
+fatal() {
+	err $@
+	exit 1
+}
+
+usage() {
+	fatal "usage: $0 { data | function.c {args | lo hi step} }"
+}
+
+test $# -lt 1 && usage
+
+if test "${1##*.}" = "c" ; then
+	CC="cc"
+	CFLAGS="-Wall -pedantic -std=c99"
+	FUNSRC=$1
+	FUNBIN=${1%%.c}
+	FUNPRG=$FUNBIN-main.c
+	cat > $FUNPRG << EOF
+extern double f(double);
+
+int
+main(int argc, char** argv)
+{
+	double l, h, s, x;
+	if (argc == 1 + 1) {
+		/* args */
+	} else if (argc == 1 + 3) {
+		/* lo hi step */
+	} else {
+		return -1;
+	}
+	return 0;
+}
+EOF
+	$CC -o $FUNBIN $FUNSRC $FUNPRG -lm || fatal cannot compile $FUNSRC
+	$FUNBIN args
+else
+	DATA=$1
+fi

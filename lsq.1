@@ -1,0 +1,87 @@
+.Dd May 23, 2018
+.Dt LSQ 1
+.Os
+.Sh NAME
+.Nm lsq
+.Nd least squares approximation
+.Sh SYNOPSIS
+.Nm
+.Op Fl D Ar degree
+.Op Fl d
+.Op Fl n
+.Op Fl v
+.Ar data
+.Nm
+.Op Fl D Ar degree
+.Op Fl d
+.Op Fl n
+.Op Fl v
+.Ar function.o Ar args
+.Nm
+.Op Fl D Ar degree
+.Op Fl d
+.Op Fl n
+.Op Fl v
+.Ar function.o lo hi step
+.Sh DESCRIPTION
+.Nm
+approximates the given
+.Ar data
+with a polynomial of the given
+.Ar degree .
+The
+.Ar data
+file is expected to include two real numbers on each line:
+the argument and the function value.
+It is not an error if an argument is assigned a value more than once;
+that is to say, the data do not necessarily represent a function.)
+.Pp
+The data can also be given as values of a predefined
+.Ar function .
+In that case, the argument is an object file implementing a
+.Ft double
+.Fn f "double"
+function which
+.Nm
+will use via
+.Xr dlopen 3 .
+Either an
+.Ar args
+file must then be given specifying the arguments
+at which the function is to be evaluated, or a
+.Ar lo hi step
+specification must be given, describing the interval
+and steps at which the function is to be sampled.
+.Pp
+Once the polynomial approximation is figured out,
+.Nm
+reads further arguments on its standard input
+and responds with the approximating function values
+on its standard output.
+.Pp
+The options are as follows:
+.Pp
+.Bl -tag -width Ds -compact
+.It Fl D
+Use a polynomial of the given
+.Ar degree
+(linear by default).
+.It Fl d
+Print the original value, approximation and difference with
+.Fl v .
+.It Fl n
+Do not read further arguments from standard input.
+Implies
+.Fl v .
+.It Fl v
+Print the approximated values at the given
+.Ar data
+points first.
+.El
+.Sh EXAMPLES
+.Dl $ lsq data
+.Dl $ lsq data < args
+.Dl $ lsq data < args > vals
+.Pp
+.Dl $ cc -shared -o function.so function.c
+.Dl $ lsq function.so -1 +1 0.01

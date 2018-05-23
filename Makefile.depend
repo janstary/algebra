@@ -1,0 +1,6 @@
+lc.o: lc.c matrix.h lincode.h
+le.o: le.c matrix.h lineq.h
+lincode.o: lincode.c lincode.h
+lineq.o: lineq.c lineq.h matrix.h
+lsq.o: lsq.c matrix.h lineq.h
+matrix.o: matrix.c matrix.h

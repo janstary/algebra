@@ -1,0 +1,40 @@
+.Dd April 3, 2018
+.Dt LC 1
+.Os
+.Sh NAME
+.Nm lc
+.Nd decode messages in a linear code
+.Sh SYNOPSIS
+.Nm
+.Op Fl c
+.Op Fl g
+.Ar code
+.Op Ar
+.Sh DESCRIPTION
+.Nm
+learns a linear code described by the matrix given in
+.Ar code
+and proceeds to read and decode a message using that code,
+presented either on the standard input or in a named file,
+one word per line.
+.Pp
+The options are as follows.
+.Pp
+.Bl -tag -width xxx -compact
+.It Fl c
+The matrix given in
+.Ar code
+is the control matrix.
+.It Fl C
+Display the control matrix.
+.It Fl g
+The matrix given in
+.Ar code
+is the generating matrix (the default).
+.It Fl G
+Display the generating matrix.
+.It Fl v
+Be verbose.
+.El
+.Sh AUTHORS
+.An Jan Stary Aq Mt hans@stare.cz
