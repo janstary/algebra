@@ -120,7 +120,7 @@ approx(struct data *data, double *coef, long len)
 			e += d * d;
 			printf("% e % e % e % e\n", p->x, val, p->y, d);
 		} else {
-			printf("% e %e\n", p->x, val);
+			printf("% e % e\n", p->x, val);
 		}
 	}
 	return 0;
