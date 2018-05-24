@@ -141,7 +141,7 @@ nulcols(double* row, long cols)
 int
 gem(struct matrix* mtx)
 {
-	double minabs, *m, *A, *B, a, b;
+	double *m, *A, *B, a, b;
 	long c, r, j, z, maxcol, minrow, maxnul;
 	if (NULL == mtx || 0 == mtx->rows || 0 == mtx->cols)
 		return -1;
@@ -151,23 +151,20 @@ gem(struct matrix* mtx)
 		err(1, NULL);
 	/* go through all columns, see if they need geming. */
 	for (c = 0, maxcol = MIN(mtx->cols, mtx->rows); c < maxcol; c++) {
-		/* find the row with the smallest nonzero lead. */
-		for (r = c, minabs = -1, maxnul = 0; r < mtx->rows; r++) {
+		/* find a row with a nonzero lead
+		 * and as many zeros as possible */
+		for (r = c, maxnul = -1, minrow = -1; r < mtx->rows; r++) {
 			if (0 == mtx->m[r][c])
 				continue;
-			if ((minabs < 0)
-			|| (ABS(mtx->m[r][c]) < minabs)) {
-				minabs = mtx->m[r][c];
-				minabs = ABS(minabs);
-				minrow = r;
-			} else if ((ABS(mtx->m[r][c]) == minabs)
-			&& ((z = nulcols(mtx->m[r], mtx->cols)) > maxnul)) {
+			if ((z = nulcols(mtx->m[r], mtx->cols)) > maxnul) {
 				minrow = r;
 				maxnul = z;
 			}
 		}
-		if (minabs < 0)
+		if (minrow == -1) {
+			/* no row with a nonzero lead at this column */
 			goto elim;
+		}
 		A = mtx->m[minrow];
 		/* combine the other rows appropriately, zeroing their lead */
 		for (r = c; r < mtx->rows; r++) {
