@@ -35,7 +35,8 @@ le_OBJS =	le.o lineq.o matrix.o
 lsq_OBJS =	lsq.o lineq.o matrix.o
 OBJS =		$(lc_OBJS) $(le_OBJS) $(lsq_OBJS) $(COMPAT_OBJS)
 
-BINS =	lc le lsq lsqdiff
+PROG =	lc le lsq
+BINS =	$(PROG) lsqdiff
 MAN1 =	lc.1 le.1 lsq.1
 
 EXAMPLES = \
@@ -86,7 +87,7 @@ example: install
 	lsqdiff diff-sin-4.png -D4 example-data-sin
 
 clean:
-	rm -f $(BINS) $(OBJS)
+	rm -f $(PROG) $(OBJS)
 	rm -rf $(TARBALL) algebra-$(VERSION)
 	rm -rf *.dSYM *.core *~ .*~
 
