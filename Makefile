@@ -35,7 +35,7 @@ le_OBJS =	le.o lineq.o matrix.o
 lsq_OBJS =	lsq.o lineq.o matrix.o
 OBJS =		$(lc_OBJS) $(le_OBJS) $(lsq_OBJS) $(COMPAT_OBJS)
 
-BINS =	lc le lsq
+BINS =	lc le lsq lsqdiff
 MAN1 =	lc.1 le.1 lsq.1
 
 EXAMPLES = \
@@ -78,6 +78,12 @@ install: $(BINS) $(MAN1)
 uninstall:
 	cd $(BINDIR)      && rm $(BINS)
 	cd $(MANDIR)/man1 && rm $(MAN1)
+
+example: install
+	lsqdiff diff-sin-1.png -D1 example-data-sin
+	lsqdiff diff-sin-2.png -D2 example-data-sin
+	lsqdiff diff-sin-3.png -D3 example-data-sin
+	lsqdiff diff-sin-4.png -D4 example-data-sin
 
 clean:
 	rm -f $(BINS) $(OBJS)

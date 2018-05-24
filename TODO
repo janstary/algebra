@@ -1,4 +1,6 @@
 * README, INSTALL
+* lsqdiff.1
+* strtonum et al everywhere
 * slap the license on everything
 * matrix: addition, multiplication, inverse, etc
 * wlsq: weighted least squares
