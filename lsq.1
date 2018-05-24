@@ -62,14 +62,16 @@ reads further arguments on its standard input
 and responds with the approximating function values
 on its standard output.
 .Pp
-When called as
-.Nm wlsq ,
-.Nm lsq
-performs a weighted least square approximation,
-using the (1-x) weight function, cut off at zero.
-This means a specific polynomial is figured out for each input argument,
-as opposed to a single global approximation.
-That takes a lot more computation,
+When called as with
+.Fl w ,
+.Nm
+performs a weighted moving least square approximation.
+Moving means that a specific polynomial is figured out
+for each input argument, as opposed to a single global approximation.
+Weighted means that a weight is given to the error commited at each
+given data point, decaying with exp(-distance),
+as opposed to a constant wieght of one.
+This takes significantly more computation,
 but gives a significantly better approximation.
 .Pp
 The options are as follows:

@@ -24,10 +24,12 @@ linsolve(struct matrix *mtx)
 		warnx("One column is not enough");
 		return NULL;
 	}
+	/*prmtx(mtx);*/
 	if (-1 == gem(mtx)) {
 		warnx("Could not GEM");
 		return NULL;
 	}
+	/*prmtx(mtx);*/
 	if (NULL == (sol = calloc(1, sizeof(struct linsol))))
 		err(1, NULL);
 	sol->len = mtx->cols-1;

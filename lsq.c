@@ -63,10 +63,10 @@ rdata(FILE *fp, struct data *data)
 	return 0;
 }
 
-/* Evaluate the given polynomial at the given point.
- * FIXME: square and multiply. */
+/* Evaluate a given polynomial at a given point. */
+/* FIXME: Horner? Square-and-Multiply? */
 double
-eval(double x, double *coef, long len)
+eval(double *coef, long len, double x)
 {
 	long p;
 	double *c, val = 0;
@@ -76,20 +76,23 @@ eval(double x, double *coef, long len)
 }
 
 /* The weight function: 1-x, cut of to zero at x=1.
- * TODO: also have a different weight function suited at point x,
- * according to the density of the neighbouring data points. */
+ * TODO: also have a weight function suited at point x,
+ * according to the density of neighbouring data points. */
+/* TODO: cut off to zero for > epsilon */
 double
 weight(double x)
 {
 	if (x < 0 || x > 1)
 		return 0;
-	return 1-x;
+	return exp(-x);
 }
 
-/* Prepare the optimization matrix whose solution
- * is the degree-tuple of the lsq coeficients. */
+/* Prepare the optimization matrix weighted at point x
+ * whose solution is the degree-tuple of the wlsq coeficients.
+ * It the weight function is NULL, make it a constant 1.
+ * Return the composed matrix, or NULL on error. */
 struct matrix*
-mkmtx(struct data *data, int degree)
+mkmtx(struct data *data, int degree, double(*w)(double), double x)
 {
 	struct pt *p;
 	long r, c, n;
@@ -108,23 +111,17 @@ mkmtx(struct data *data, int degree)
 			err(1, NULL);
 		for (c = 0; c < mtx->cols-1; c++) {
 			for (n = 0, p = data->points; n < data->num; n++, p++) {
-				mtx->m[r][c] += pow(p->x, r+c);
+				mtx->m[r][c] += pow(p->x, r+c)
+					* (w ? w(fabs(x - p->x)) : 1);
 			}
 		}
 	}
 	/* the right hand side */
 	for (r = 0; r < mtx->rows; r++)
 		for (n = 0, p = data->points; n < data->num; n++, p++)
-			mtx->m[r][c] += pow(p->x, r) * p->y;
+			mtx->m[r][c] += pow(p->x, r) * p->y
+				* (w ? w(fabs(x - p->x)) : 1);
 	return mtx;
-}
-
-/* Prepare the optimization matrix weighted at point x
- * whose solution is the degree-tuple of the wlsq coeficients. */
-struct matrix*
-mkwmtx(double x, struct data *data, int degree, double(*w)(double))
-{
-	return mkmtx(data, degree); /* TODO */
 }
 
 /* Approximate the original data with a polynomial. */
@@ -137,7 +134,7 @@ approx(struct data *data, double *coef, long len)
 	if (NULL == data || NULL == coef || 0 == len)
 		return -1;
 	for (n = 0, p = data->points; n < data->num; n++, p++) {
-		val = eval(p->x, coef, len);
+		val = eval(coef, len, p->x);
 		if (dflag) {
 			printf("% e % e % e % e\n", p->x, val, p->y, val-p->y);
 		} else {
@@ -152,13 +149,13 @@ approx(struct data *data, double *coef, long len)
  * leading to the best polynomial to use at the given point.
  * Return the solution, or NULL on error. */
 struct linsol*
-wsol(double x, struct data *data, int degree, double(*w)(double))
+wsol(struct data *data, int degree, double(*w)(double), double x)
 {
 	struct matrix *mtx;
 	struct linsol *sol;
 	if (NULL == data || NULL == w || degree < 1)
 		return NULL;
-	if (NULL == (mtx = mkwmtx(x, data, degree, weight))) {
+	if (NULL == (mtx = mkmtx(data, degree, weight, x))) {
 		warnx("Cannot figure out matrix at %e", x);
 		return NULL;
 	}
@@ -183,11 +180,11 @@ wapprox(struct data *data)
 	if (NULL == data)
 		return -1;
 	for (n = 0, p = data->points; n < data->num; n++, p++) {
-		if (NULL == (sol = wsol(p->x, data, degree, weight))) {
+		if (NULL == (sol = wsol(data, degree, weight, p->x))) {
 			warnx("Cannot solve equations at %e", p->x);
 			return -1;
 		}
-		val = eval(p->x, sol->par, sol->len);
+		val = eval(sol->par, sol->len, p->x);
 		if (dflag && vflag) {
 			printf("% e % e % e % e\n", p->x, val, p->y, val-p->y);
 		} else {
@@ -264,17 +261,17 @@ main(int argc, char** argv)
 		if (nflag)
 			return 0;
 		while (1 == (c = fscanf(stdin, "%le", &x))) {
-			if (NULL == (sol = wsol(x, data, degree, weight))) {
+			if (NULL == (sol = wsol(data, degree, weight, x))) {
 				warnx("Cannot solve equations for %e", x);
 				continue;
 			}
-			printf("% e % e\n", x, eval(x, sol->par, sol->len));
+			printf("% e % e\n", x, eval(sol->par, sol->len, x));
 			freesol(sol);
 		}
 		return feof(stdin) ? 0 : 1;
 	} else {
 		/* simple least-square regression */
-		if (NULL == (mtx = mkmtx(data, degree))) {
+		if (NULL == (mtx = mkmtx(data, degree, NULL, 0))) {
 			warnx("Cannot figure out matrix from data");
 			return 1;
 		}
@@ -282,13 +279,14 @@ main(int argc, char** argv)
 			warnx("Cannot solve linear equations");
 			return 1;
 		}
+		/*prsol(sol);*/
 		freemtx(mtx);
 		if (vflag)
 			approx(data, sol->par, sol->len);
 		if (nflag)
 			return 0;
 		while (1 == (c = fscanf(stdin, "%le", &x)))
-			printf("% e % e\n", x, eval(x, sol->par, sol->len));
+			printf("% e % e\n", x, eval(sol->par, sol->len, x));
 		freesol(sol);
 		return feof(stdin) ? 0 : 1;
 	}
