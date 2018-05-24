@@ -8,6 +8,8 @@
 #include "config.h"
 #include "matrix.h"
 
+#define MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 /* Parse a string of numbers separated by whitespace and save it in an array.
  * Return the size of the array, or -1 for error. The returned array gets
  * allocated here; it is the caller's responsibility to free it later. */
