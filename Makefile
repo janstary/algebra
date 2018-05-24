@@ -87,7 +87,10 @@ example: install
 	lsqdiff diff-sin-4.png -D4 example-data-sin
 	lsqdiff diff-sin-5.png -D5 example-data-sin
 	lsqdiff diff-sin-6.png -D6 example-data-sin
-
+	lsqdiff diff-exp-1.png -w -D1 example-data-exp
+	lsqdiff diff-exp-2.png -w -D2 example-data-exp
+	lsqdiff diff-exp-3.png -w -D3 example-data-exp
+	lsqdiff diff-exp-4.png -w -D4 example-data-exp
 	lsqdiff diff-vu-1.png -w -D1 example-data-vu
 	lsqdiff diff-vu-2.png -w -D2 example-data-vu
 	lsqdiff diff-vu-3.png -w -D3 example-data-vu
