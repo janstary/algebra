@@ -138,7 +138,7 @@ approx(struct data *data, double *coef, long len)
 		return -1;
 	for (n = 0, p = data->points; n < data->num; n++, p++) {
 		val = eval(p->x, coef, len);
-		if (dflag && vflag) {
+		if (dflag) {
 			printf("% e % e % e % e\n", p->x, val, p->y, val-p->y);
 		} else {
 			printf("% e % e\n", p->x, val);
@@ -214,6 +214,7 @@ main(int argc, char** argv)
 			break;
 		case 'd':
 			dflag = 1;
+			vflag = 1;
 			break;
 		case 'n':
 			nflag = 1;
