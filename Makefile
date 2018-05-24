@@ -85,11 +85,13 @@ example: install
 	lsqdiff diff-sin-2.png -D2 example-data-sin
 	lsqdiff diff-sin-3.png -D3 example-data-sin
 	lsqdiff diff-sin-4.png -D4 example-data-sin
+	lsqdiff diff-sin-5.png -D5 example-data-sin
+	lsqdiff diff-sin-6.png -D6 example-data-sin
 
 clean:
 	rm -f $(PROG) $(OBJS)
 	rm -rf $(TARBALL) algebra-$(VERSION)
-	rm -rf *.dSYM *.core *~ .*~
+	rm -rf *.png *.dSYM *.core *~ .*~
 
 distclean: clean
 	rm -f Makefile.local config.h config.h.old config.log config.log.old
