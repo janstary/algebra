@@ -106,3 +106,13 @@ prsol(struct linsol* sol)
 	}
 	printf(">\n");
 }
+
+void
+freesol(struct linsol* sol)
+{
+	if (sol) {
+		free(sol->par);
+		free(sol->hom);
+		free(sol);
+	}
+}

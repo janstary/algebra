@@ -15,6 +15,7 @@ struct matrix {
 };
 
 struct matrix*	readmtx(const char*);
+void		freemtx(struct matrix*);
 void		prmtx(struct matrix*);
 int		gem(struct matrix*);
 

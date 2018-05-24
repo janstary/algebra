@@ -60,6 +60,7 @@ freemtx(struct matrix *mtx)
 {
 	if (mtx) {
 		free(mtx->m);
+		free(mtx);
 	}
 }
 

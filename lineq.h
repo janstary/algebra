@@ -11,6 +11,7 @@ struct linsol {
 };
 
 struct linsol*	linsolve(struct matrix*);
+void		freesol(struct linsol*);
 void		prsol(struct linsol*);
 
 #endif

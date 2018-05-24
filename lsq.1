@@ -10,18 +10,21 @@
 .Op Fl d
 .Op Fl n
 .Op Fl v
+.Op Fl w
 .Ar data
 .Nm
 .Op Fl D Ar degree
 .Op Fl d
 .Op Fl n
 .Op Fl v
+.Op Fl w
 .Ar function.o Ar args
 .Nm
 .Op Fl D Ar degree
 .Op Fl d
 .Op Fl n
 .Op Fl v
+.Op Fl w
 .Ar function.o lo hi step
 .Sh DESCRIPTION
 .Nm
@@ -59,6 +62,16 @@ reads further arguments on its standard input
 and responds with the approximating function values
 on its standard output.
 .Pp
+When called as
+.Nm wlsq ,
+.Nm lsq
+performs a weighted least square approximation,
+using the (1-x) weight function, cut off at zero.
+This means a specific polynomial is figured out for each input argument,
+as opposed to a single global approximation.
+That takes a lot more computation,
+but gives a significantly better approximation.
+.Pp
 The options are as follows:
 .Pp
 .Bl -tag -width Ds -compact
@@ -77,6 +90,9 @@ Implies
 Print the approximated values at the given
 .Ar data
 points first.
+.It Fl w
+Behave as
+.Nm wlsq .
 .El
 .Sh EXAMPLES
 .Dl $ lsq data

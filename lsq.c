@@ -13,6 +13,7 @@
 int dflag;
 int nflag;
 int vflag;
+int wflag;
 int degree = 1;
 
 extern char* __progname;
@@ -62,6 +63,31 @@ rdata(FILE *fp, struct data *data)
 	return 0;
 }
 
+/* Evaluate the given polynomial at the given point.
+ * FIXME: square and multiply. */
+double
+eval(double x, double *coef, long len)
+{
+	long p;
+	double *c, val = 0;
+	for (p = 0, c = coef; p < len; p++, c++)
+		val += (*c) * pow(x, p);
+	return val;
+}
+
+/* The weight function: 1-x, cut of to zero at x=1.
+ * TODO: also have a different weight function suited at point x,
+ * according to the density of the neighbouring data points. */
+double
+weight(double x)
+{
+	if (x < 0 || x > 1)
+		return 0;
+	return 1-x;
+}
+
+/* Prepare the optimization matrix whose solution
+ * is the degree-tuple of the lsq coeficients. */
 struct matrix*
 mkmtx(struct data *data, int degree)
 {
@@ -93,33 +119,77 @@ mkmtx(struct data *data, int degree)
 	return mtx;
 }
 
-double
-eval(double x, double *coef, long len)
+/* Prepare the optimization matrix weighted at point x
+ * whose solution is the degree-tuple of the wlsq coeficients. */
+struct matrix*
+mkwmtx(double x, struct data *data, int degree, double(*w)(double))
 {
-	long p;
-	double *c, val = 0;
-	/* FIXME: square and multiply */
-	for (p = 0, c = coef; p < len; p++, c++)
-		val += (*c) * pow(x, p);
-	return val;
+	return mkmtx(data, degree); /* TODO */
 }
 
-/* TODO: display the diffs too */
-/* TODO: save the sum of squared diffs in a given double */
+/* Approximate the original data with a polynomial. */
 int
 approx(struct data *data, double *coef, long len)
 {
 	long n;
 	struct pt *p;
-	double d, e = 0, val;
+	double val;
 	if (NULL == data || NULL == coef || 0 == len)
 		return -1;
 	for (n = 0, p = data->points; n < data->num; n++, p++) {
 		val = eval(p->x, coef, len);
 		if (dflag && vflag) {
-			d = val - p->y;
-			e += d * d;
-			printf("% e % e % e % e\n", p->x, val, p->y, d);
+			printf("% e % e % e % e\n", p->x, val, p->y, val-p->y);
+		} else {
+			printf("% e % e\n", p->x, val);
+		}
+	}
+	return 0;
+}
+
+
+/* Compose and solve the set of linear equations
+ * leading to the best polynomial to use at the given point.
+ * Return the solution, or NULL on error. */
+struct linsol*
+wsol(double x, struct data *data, int degree, double(*w)(double))
+{
+	struct matrix *mtx;
+	struct linsol *sol;
+	if (NULL == data || NULL == w || degree < 1)
+		return NULL;
+	if (NULL == (mtx = mkwmtx(x, data, degree, weight))) {
+		warnx("Cannot figure out matrix at %e", x);
+		return NULL;
+	}
+	if (NULL == (sol = linsolve(mtx))) {
+		warnx("Cannot solve equations for %e", x);
+		freemtx(mtx);
+		return NULL;
+	}
+	freemtx(mtx);
+	return sol;
+}
+
+/* Approximate the original data with polynomials,
+ * using a specific polynomial at each point. */
+int
+wapprox(struct data *data)
+{
+	long n;
+	struct pt *p;
+	struct linsol *sol;
+	double val;
+	if (NULL == data)
+		return -1;
+	for (n = 0, p = data->points; n < data->num; n++, p++) {
+		if (NULL == (sol = wsol(p->x, data, degree, weight))) {
+			warnx("Cannot solve equations at %e", p->x);
+			return -1;
+		}
+		val = eval(p->x, sol->par, sol->len);
+		if (dflag && vflag) {
+			printf("% e % e % e % e\n", p->x, val, p->y, val-p->y);
 		} else {
 			printf("% e % e\n", p->x, val);
 		}
@@ -137,7 +207,7 @@ main(int argc, char** argv)
 	struct linsol *sol;
 	double x;
 
-	while ((c = getopt(argc, argv, "D:dnv")) != -1) switch (c) {
+	while ((c = getopt(argc, argv, "D:dnvw")) != -1) switch (c) {
 		case 'D':
 			degree = atoi(optarg);
 			/* FIXME strtonum */
@@ -151,6 +221,9 @@ main(int argc, char** argv)
 			break;
 		case 'v':
 			vflag = 1;
+			break;
+		case 'w':
+			wflag = 1;
 			break;
 	}
 	argc -= optind;
@@ -176,7 +249,6 @@ main(int argc, char** argv)
 		warnx("Cannot read data from '%s'", *argv);
 		return 1;
 	}
-	/*prdata(data);*/
 
 	if (data->num <= degree) {
 		/* This will result in a singular matrix
@@ -184,31 +256,40 @@ main(int argc, char** argv)
 		warnx("%zu points for degree %d", data->num, degree);
 	}
 
-	if (NULL == (mtx = mkmtx(data, degree))) {
-		warnx("Cannot figure out matrix from data");
-		return 1;
+	if (wflag) {
+		/* weighted least-square regression */
+		if (vflag)
+			wapprox(data);
+		if (nflag)
+			return 0;
+		while (1 == (c = fscanf(stdin, "%le", &x))) {
+			if (NULL == (sol = wsol(x, data, degree, weight))) {
+				warnx("Cannot solve equations for %e", x);
+				continue;
+			}
+			printf("% e % e\n", x, eval(x, sol->par, sol->len));
+			freesol(sol);
+		}
+		return feof(stdin) ? 0 : 1;
+	} else {
+		/* simple least-square regression */
+		if (NULL == (mtx = mkmtx(data, degree))) {
+			warnx("Cannot figure out matrix from data");
+			return 1;
+		}
+		if (NULL == (sol = linsolve(mtx))) {
+			warnx("Cannot solve linear equations");
+			return 1;
+		}
+		freemtx(mtx);
+		if (vflag)
+			approx(data, sol->par, sol->len);
+		if (nflag)
+			return 0;
+		while (1 == (c = fscanf(stdin, "%le", &x)))
+			printf("% e % e\n", x, eval(x, sol->par, sol->len));
+		freesol(sol);
+		return feof(stdin) ? 0 : 1;
 	}
-	/*prmtx(mtx);*/
-
-	if (-1 == gem(mtx)) {
-		warnx("Cannot GEM the optimization matrix");
-		return 1;
-	}
-	/*prmtx(mtx);*/
-
-	if (NULL == (sol = linsolve(mtx))) {
-		warnx("Cannot solve linear equations");
-		return 1;
-	}
-	/*prsol(sol);*/
-
-	if (vflag)
-		approx(data, sol->par, sol->len);
-
-	/* read further arguments from stdin */
-	if (nflag)
-		return 0;
-	while (1 == (c = fscanf(stdin, "%le", &x)))
-		printf("% e % e\n", x, eval(x, sol->par, sol->len));
-	return feof(stdin) ? 0 : 1;
+	return 0;
 }
