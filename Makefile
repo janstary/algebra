@@ -88,6 +88,11 @@ example: install
 	lsqdiff diff-sin-5.png -D5 example-data-sin
 	lsqdiff diff-sin-6.png -D6 example-data-sin
 
+	lsqdiff diff-vu-1.png -w -D1 example-data-vu
+	lsqdiff diff-vu-2.png -w -D2 example-data-vu
+	lsqdiff diff-vu-3.png -w -D3 example-data-vu
+	lsqdiff diff-vu-4.png -w -D4 example-data-vu
+
 clean:
 	rm -f $(PROG) $(OBJS)
 	rm -rf $(TARBALL) algebra-$(VERSION)
