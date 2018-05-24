@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# FIXME: lsq itself can do this, if equipped with dlopen(3).
-# Here, we will just draw the resulting pictures.
+# Compose a picture of the difference between given data
+# and the polynomial approximation obtained with lsq(1).
+# This requires gnuplot(1) to create the actual image.
 
 err() {
 	echo $@ >&2
@@ -13,36 +14,31 @@ fatal() {
 }
 
 usage() {
-	fatal "usage: $0 { data | function.c {args | lo hi step} }"
+	fatal "usage: $0 image lsqargs"
 }
 
-test $# -lt 1 && usage
+test $# -lt 2 && usage
+which lsq > /dev/null || fatal lsq not found
+which gnuplot > /dev/null || fatal gnuplot not found
 
-if test "${1##*.}" = "c" ; then
-	CC="cc"
-	CFLAGS="-Wall -pedantic -std=c99"
-	FUNSRC=$1
-	FUNBIN=${1%%.c}
-	FUNPRG=$FUNBIN-main.c
-	cat > $FUNPRG << EOF
-extern double f(double);
+GPLDATA=`mktemp`
+trap "rm $GPLDATA" EXIT INT TERM
 
-int
-main(int argc, char** argv)
-{
-	double l, h, s, x;
-	if (argc == 1 + 1) {
-		/* args */
-	} else if (argc == 1 + 3) {
-		/* lo hi step */
-	} else {
-		return -1;
-	}
-	return 0;
-}
+PICTURE=$1 ; shift
+LSQDATA=$@
+
+lsq -n -d $LSQDATA > $GPLDATA || fatal Running "'lsq 0n 0d $LSQDATA'" failed
+
+gnuplot <<EOF
+set title "lsq -n -d $LSQDATA"
+set style data points
+#set xrange [ "1/6/93":"1/11/93" ]
+#set xrange [ "201301010000": ]
+set terminal ${PICTURE##*.} medium size 1280,960
+set output '$PICTURE'
+set key outside
+unset grid
+plot	'$GPLDATA' using 1:3 with points title 'orig',	\
+	''         using 1:2 with points title 'lsq',	\
+	''         using 1:4 with points title 'err'
 EOF
-	$CC -o $FUNBIN $FUNSRC $FUNPRG -lm || fatal cannot compile $FUNSRC
-	$FUNBIN args
-else
-	DATA=$1
-fi
