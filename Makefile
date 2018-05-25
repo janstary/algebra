@@ -44,7 +44,6 @@ EXAMPLES = \
 	example-data-log	\
 	example-data-sin	\
 	example-data-trivial	\
-	example-function-square.c\
 	example-matrix-3x4	\
 	example-matrix-identity	\
 	example-matrix-lincode	\
