@@ -81,25 +81,27 @@ uninstall:
 	cd $(MANDIR)/man1 && rm $(MAN1)
 
 example: install
-	lsqdiff diff-sin-1.png -D1 example-data-sin
-	lsqdiff diff-sin-2.png -D2 example-data-sin
-	lsqdiff diff-sin-3.png -D3 example-data-sin
-	lsqdiff diff-sin-4.png -D4 example-data-sin
-	lsqdiff diff-sin-5.png -D5 example-data-sin
-	lsqdiff diff-sin-6.png -D6 example-data-sin
-	lsqdiff diff-exp-1.png -w -D1 example-data-exp
-	lsqdiff diff-exp-2.png -w -D2 example-data-exp
-	lsqdiff diff-exp-3.png -w -D3 example-data-exp
-	lsqdiff diff-exp-4.png -w -D4 example-data-exp
-	lsqdiff diff-vu-1.png -w -D1 example-data-vu
-	lsqdiff diff-vu-2.png -w -D2 example-data-vu
-	lsqdiff diff-vu-3.png -w -D3 example-data-vu
-	lsqdiff diff-vu-4.png -w -D4 example-data-vu
+	lsqdiff diff-sin-1.png  -D1    example-data-sin
+	lsqdiff diff-sin-2.png  -D2    example-data-sin
+	lsqdiff diff-sin-3.png  -D3    example-data-sin
+	lsqdiff diff-sin-4.png  -D4    example-data-sin
+	lsqdiff diff-sin-1w.png -D1 -w example-data-sin
+	lsqdiff diff-sin-2w.png -D2 -w example-data-sin
+	lsqdiff diff-sin-3w.png -D3 -w example-data-sin
+	lsqdiff diff-sin-4w.png -D4 -w example-data-sin
+	lsqdiff diff-exp-1.png  -D1    example-data-exp
+	lsqdiff diff-exp-2.png  -D2    example-data-exp
+	lsqdiff diff-exp-3.png  -D3    example-data-exp
+	lsqdiff diff-exp-4.png  -D4    example-data-exp
+	lsqdiff diff-exp-1w.png -D1 -w example-data-exp
+	lsqdiff diff-exp-2w.png -D2 -w example-data-exp
+	lsqdiff diff-exp-3w.png -D3 -w example-data-exp
+	lsqdiff diff-exp-4w.png -D4 -w example-data-exp
 
 clean:
 	rm -f $(PROG) $(OBJS)
 	rm -rf $(TARBALL) algebra-$(VERSION)
-	rm -rf *.png *.dSYM *.core *~ .*~
+	rm -rf diff*.png *.dSYM *.core *~ .*~
 
 distclean: clean
 	rm -f Makefile.local config.h config.h.old config.log config.log.old
