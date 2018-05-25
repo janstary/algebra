@@ -97,6 +97,14 @@ example: install
 	lsqdiff diff-exp-2w.png -D2 -w example-data-exp
 	lsqdiff diff-exp-3w.png -D3 -w example-data-exp
 	lsqdiff diff-exp-4w.png -D4 -w example-data-exp
+	lsqdiff diff-log-1.png  -D1    example-data-log
+	lsqdiff diff-log-2.png  -D2    example-data-log
+	lsqdiff diff-log-3.png  -D3    example-data-log
+	lsqdiff diff-log-4.png  -D4    example-data-log
+	lsqdiff diff-log-1w.png -D1 -w example-data-log
+	lsqdiff diff-log-2w.png -D2 -w example-data-log
+	lsqdiff diff-log-3w.png -D3 -w example-data-log
+	lsqdiff diff-log-4w.png -D4 -w example-data-log
 
 clean:
 	rm -f $(PROG) $(OBJS)
