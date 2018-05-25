@@ -40,7 +40,10 @@ BINS =	$(PROG) lsqdiff
 MAN1 =	lc.1 le.1 lsq.1
 
 EXAMPLES = \
-	example-data		\
+	example-data-exp	\
+	example-data-log	\
+	example-data-sin	\
+	example-data-trivial	\
 	example-function-square.c\
 	example-matrix-3x4	\
 	example-matrix-identity	\
