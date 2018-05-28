@@ -10,11 +10,12 @@
 #include "matrix.h"
 #include "lineq.h"
 
-int dflag;
-int nflag;
-int vflag;
-int wflag;
-int degree = 1;
+int	dflag = 0;
+double	eflag = 1;
+int	nflag = 0;
+int	vflag = 0;
+int	wflag = 0;
+int	degree = 1;
 
 extern char* __progname;
 
@@ -29,9 +30,9 @@ static void
 usage(void)
 {
 	fprintf(stderr,
-		"%s [-D degree] [-d] [-n] [-v] data\n"
-		"%s [-D degree] [-d] [-n] [-v] function.so args\n"
-		"%s [-D degree] [-d] [-n] [-v] function.so hi lo step\n",
+	"%s [-D degree] [-d] [-e far] [-n] [-v] [-w] data\n"
+	"%s [-D degree] [-d] [-e far] [-n] [-v] [-w] function.so args\n"
+	"%s [-D degree] [-d] [-e far] [-n] [-v] [-w] function.so hi lo step\n",
 		__progname, __progname, __progname);
 }
 
@@ -80,9 +81,9 @@ eval(double *coef, long len, double x)
  * according to the density of neighbouring data points. */
 /* TODO: cut off to zero for > epsilon */
 double
-weight(double x)
+weight(double x, double far)
 {
-	if (x < 0 || x > 1)
+	if (x < 0 || x > far)
 		return 0;
 	return exp(-x);
 }
@@ -92,7 +93,7 @@ weight(double x)
  * It the weight function is NULL, make it a constant 1.
  * Return the composed matrix, or NULL on error. */
 struct matrix*
-mkmtx(struct data *data, int degree, double(*w)(double), double x)
+mkmtx(struct data *data, int degree, double(*w)(double, double), double x)
 {
 	struct pt *p;
 	long r, c, n;
@@ -112,7 +113,7 @@ mkmtx(struct data *data, int degree, double(*w)(double), double x)
 		for (c = 0; c < mtx->cols-1; c++) {
 			for (n = 0, p = data->points; n < data->num; n++, p++) {
 				mtx->m[r][c] += pow(p->x, r+c)
-					* (w ? w(fabs(x - p->x)) : 1);
+					* (w ? w(fabs(x - p->x), eflag) : 1);
 			}
 		}
 	}
@@ -120,7 +121,7 @@ mkmtx(struct data *data, int degree, double(*w)(double), double x)
 	for (r = 0; r < mtx->rows; r++)
 		for (n = 0, p = data->points; n < data->num; n++, p++)
 			mtx->m[r][c] += pow(p->x, r) * p->y
-				* (w ? w(fabs(x - p->x)) : 1);
+				* (w ? w(fabs(x - p->x), eflag) : 1);
 	return mtx;
 }
 
@@ -149,13 +150,13 @@ approx(struct data *data, double *coef, long len)
  * leading to the best polynomial to use at the given point.
  * Return the solution, or NULL on error. */
 struct linsol*
-wsol(struct data *data, int degree, double(*w)(double), double x)
+wsol(struct data *data, int degree, double(*w)(double, double), double x)
 {
 	struct matrix *mtx;
 	struct linsol *sol;
 	if (NULL == data || NULL == w || degree < 1)
 		return NULL;
-	if (NULL == (mtx = mkmtx(data, degree, weight, x))) {
+	if (NULL == (mtx = mkmtx(data, degree, w, x))) {
 		warnx("Cannot figure out matrix at %e", x);
 		return NULL;
 	}
@@ -204,7 +205,7 @@ main(int argc, char** argv)
 	struct linsol *sol;
 	double x;
 
-	while ((c = getopt(argc, argv, "D:dnvw")) != -1) switch (c) {
+	while ((c = getopt(argc, argv, "D:de:nvw")) != -1) switch (c) {
 		case 'D':
 			degree = atoi(optarg);
 			/* FIXME strtonum */
@@ -212,6 +213,9 @@ main(int argc, char** argv)
 		case 'd':
 			dflag = 1;
 			vflag = 1;
+			break;
+		case 'e':
+			eflag = strtod(optarg, NULL);
 			break;
 		case 'n':
 			nflag = 1;
@@ -233,6 +237,11 @@ main(int argc, char** argv)
 	}
 
 	if (degree < 1) {
+		usage();
+		return 1;
+	}
+
+	if (eflag <= 0) {
 		usage();
 		return 1;
 	}

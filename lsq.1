@@ -8,6 +8,7 @@
 .Nm
 .Op Fl D Ar degree
 .Op Fl d
+.Op Fl e Ar far
 .Op Fl n
 .Op Fl v
 .Op Fl w
@@ -15,6 +16,7 @@
 .Nm
 .Op Fl D Ar degree
 .Op Fl d
+.Op Fl e Ar far
 .Op Fl n
 .Op Fl v
 .Op Fl w
@@ -22,6 +24,7 @@
 .Nm
 .Op Fl D Ar degree
 .Op Fl d
+.Op Fl e Ar far
 .Op Fl n
 .Op Fl v
 .Op Fl w
@@ -85,6 +88,10 @@ Use a polynomial of the given
 Like
 .Fl v ,
 with the original value, approximation and difference.
+.It Fl e
+Ignore the error at points this
+.Ar far
+or more (1.0 by default).
 .It Fl n
 Do not read further arguments from standard input.
 Implies
@@ -100,6 +107,7 @@ Use moving weighted least squares.
 .Dl $ lsq data
 .Dl $ lsq data < args
 .Dl $ lsq data < args > vals
+.Dl $ lsq -n -d -v -w -e 0.1 data
 .Pp
 .Dl $ cc -shared -o function.so function.c
 .Dl $ lsq function.so -1 +1 0.01
